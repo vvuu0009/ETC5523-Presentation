@@ -1,0 +1,55 @@
+---
+title: "Presentation_notes"
+author: "Vinny Vu"
+date: "21/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+readings <- read.csv("Microclimate_Sensor_Readings.csv")
+locations <- read.csv("Microclimate_Sensor_Locations.csv")
+```
+
+
+
+```{r}
+readings %>%
+  select(sensor_id,local_time,type,value,units) %>%
+  mutate(local_time = as_datetime(local_time)) %>%
+  filter(type %in% c("TPH.RH","TPH.RH-EPA-1h"))
+```
+
+
+```{r, fig.height=20}
+readings %>%
+  filter(type == "TPH.RH") %>%
+  mutate(local_time = as_datetime(local_time)) %>%
+  ggplot(aes(x = local_time,
+             y = value)) +
+  geom_line() +
+  facet_wrap(~site_id, ncol = 1)
+```
+
+
+```{r}
+readings %>%
+  mutate(local_time = as_datetime(local_time)) %>%
+  filter(type == "TPH.RH") %>%
+  select(site_id,local_time, value) %>%
+  mutate(time = format(local_time, format = "%H:%M:%S")) %>%
+  group_by(time,site_id) %>%
+  summarise(value = mean(value)) %>%
+  ggplot(aes(x = time,
+             y = value)) +
+  geom_point() 
+```
+
