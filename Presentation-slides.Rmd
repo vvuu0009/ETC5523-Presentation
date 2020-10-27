@@ -1,31 +1,36 @@
 ---
-title: "Presentation_notes"
-author: "Vinny Vu"
-date: "21/10/2020"
-output: html_document
+title: "ETC5523 Presentation"
+subtitle: "<br/>Analysis of Melbourne City Council Climate Sensor Data"
+author: 
+ - "Vinny VU"
+ - "Liu"
+date: " `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE,
-                      warning = FALSE,
-                      message = FALSE)
+options(htmltools.dir.version = FALSE)
 ```
 
-```{r}
+```{r, echo =FALSE, include = FALSE}
 library(tidyverse)
 library(lubridate)
 library(leaflet)
 library(visdat)
 library(kableExtra)
 library(tsibble)
-```
 
-```{r}
 readings <- read.csv("Microclimate_Sensor_Readings.csv")
 locations <- read.csv("Microclimate_Sensor_Locations.csv")
 ```
 
-```{r}
+```{r, echo = FALSE}
 clean <- readings %>%
   select(site_id,sensor_id,local_time,type,value,units) %>%
   mutate(local_time = as_datetime(local_time)) %>%
@@ -36,18 +41,27 @@ clean <- readings %>%
   mutate(hour = hour(time))
   
 ```
-# Introduction 
 
-- seek to understand climate sensor data from Melbourne City Council
-- two data sets: sensor locations, sensor readings 
+# Background 
+
+- Seek to understand climate sensor data from Melbourne City Council
+- Two data sets: sensor locations, sensor readings 
 - **How does relative humidity in Melbourne change throughout the day and year?**
 - **When is it most uncomfortable to walk around the city (humidity below 30% or above 60%)? **
 - Relative humidity: the amount of water vapor present in air expressed as a percentage of the amount needed for saturation at the same temperature
 
+???
+
+---
+class: inverse, center, middle
 
 # Data Checking 
 
-```{r}
+---
+
+# Data Checking 
+
+```{r, echo=FALSE, warning = FALSE, message = FALSE, fig.height=4, dev='svg'}
 
 clean %>% 
   group_by(site_id) %>%
@@ -59,9 +73,12 @@ clean %>%
   kable_styling()
 ```
 
+---
+# Data Checking
 
+- Missing values in the data set
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
 
 miss <- clean %>%
   group_by(site_id,date) %>%
@@ -72,7 +89,7 @@ gaps <- miss %>%
   count_gaps(.full = TRUE)
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
 gaps %>%
   ggplot(aes(x = site_id, colour = site_id)) +
   geom_linerange(aes(ymin = .from, ymax = .to)) +
@@ -86,23 +103,25 @@ gaps %>%
   coord_flip()
 ```
 
+---
 # Locations 
 
-
-
-```{r}
+```{r location, echo = FALSE, warning= FALSE, message= FALSE, dev='svg', out.width='100%'}
 locations %>%
   leaflet() %>%
   addTiles() %>%
   addMarkers(~longitude,~latitude, popup = ~site_id)
 ```
+---
 
-# Day
+class: inverse, center, middle
 
+# Relative Humidity Across the Day
 
+---
+# Relative Humidity Across the Day by Site
 
-
-```{r}
+```{r RH-day1, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
 clean %>%
   group_by(site_id,sensor_id,type,hour) %>%
   summarise(value = mean(value, na.rm = TRUE)) %>%
@@ -120,7 +139,11 @@ clean %>%
         plot.title.position = "plot")
 ```
 
-```{r}
+---
+
+# Relative Humidity Across the Day Average
+
+```{r RH-day2, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
 clean %>%
   group_by(hour) %>%
   summarise(value = mean(value, na.rm = TRUE)) %>%
@@ -136,40 +159,16 @@ clean %>%
         plot.title.position = "plot")
 ```
 
-```{r, include=FALSE}
-clean %>%
-  group_by(site_id,sensor_id,type,hour) %>%
-  summarise(value = mean(value, na.rm = TRUE)) %>%
-  ggplot(aes(x = hour,
-             y = value,
-             colour = site_id)) +
-  geom_point() +
-  facet_wrap(~site_id) +
-  theme_minimal()
-  
-```
+---
 
-# Year
+class: inverse, center, middle
 
-```{r}
-clean %>%
-  group_by(date) %>%
-  summarise(value = mean(value, na.rm = TRUE)) %>%
-  ggplot(aes(x = date,
-             y = value)) +
-  geom_point(alpha = 0.5, size = 0.5) +
-  geom_smooth(method = "loess", se = FALSE, color = "steelblue", alpha = 0.5, size = 0.5) +
-  labs(x = "",
-       y = "Relative Humidity (%)",
-       colour = "Site ID",
-       title = "Average Relative Humidity by Day") +
-  theme_minimal() +
-  theme(text = element_text(size = 10),
-        plot.title.position = "plot")
-```
+# Relative Humidity Across the Year
+---
 
+# Relative Humidity Across the Year by Site
 
-```{r }
+```{r RH-year1, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
 clean %>%
   group_by(site_id,date) %>%
   summarise(value = mean(value, na.rm = TRUE)) %>%
@@ -187,10 +186,32 @@ clean %>%
         text = element_text(size = 10),
         plot.title.position = "plot")
 ```
+---
+
+# Relative Humidity Across the Year by Average
+
+```{r RH-year2, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
+clean %>%
+  group_by(date) %>%
+  summarise(value = mean(value, na.rm = TRUE)) %>%
+  ggplot(aes(x = date,
+             y = value)) +
+  geom_point(alpha = 0.5, size = 0.5) +
+  geom_smooth(method = "loess", se = FALSE, color = "steelblue", alpha = 0.5, size = 0.5) +
+  labs(x = "",
+       y = "Relative Humidity (%)",
+       colour = "Site ID",
+       title = "Average Relative Humidity by Day") +
+  theme_minimal() +
+  theme(text = element_text(size = 10),
+        plot.title.position = "plot")
+```
+
+---
 
 # Comparing Across Sensors 
 
-```{r, fig.height=10}
+```{r site, echo = FALSE, warning = FALSE, message = FALSE,fig.height=5, dev='svg'}
 
 med_ctr <- function(x, na.rm = TRUE) {
   x - mean(x, na.rm = TRUE)
@@ -214,21 +235,27 @@ clean %>% group_by(site_id,date) %>%
         legend.position = "none")
 ```
 
-https://www.weathernationtv.com/news/dry-cold-vs-humid-cold/
+---
+
+class: inverse, center, middle
 
 # How does humidity effect US?
+
+---
 
 ##  When is it most uncomfortable to walk around the city (humidity below 30% or above 60%)?
 
 Hot weather:  
-
 - Higher levels of humidity can make us feel even warmer
 - The body is cooled through evaporation and higher levels of humidity can stifle this 
 - On warm days with high levels of humidity we can feel warmer and "sticky" as our sweat does not evaporate as efficiently
 - Think about countries near the equator such as Singapore, or Northern Queensland. 
 
-Cold weather:  
+---
 
+##  When is it most uncomfortable to walk around the city (humidity below 30% or above 60%)?
+
+Cold weather:  
 - By the same logic on colder days with higher humidity we should feel warmer
 - However, it is the opposite: we feel colder on cold days with higher humidity 
 - High humidity impairs the insulation ability of clothing 
@@ -237,3 +264,9 @@ Cold weather:
 - Think about rain on a cold day
 
 #### It would be most uncomfortable to walk around the city on days with high humidity 
+
+---
+
+class: inverse, center, middle
+
+# Thanks!
