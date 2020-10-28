@@ -53,7 +53,7 @@ clean %>%
   group_by(site_id) %>%
   summarise('Minimum Date'= min(date),
             'Maximum Date' = max(date),
-            'Average Humidity' = mean(value, na.rm = TRUE)) %>%
+            'Average Humidity' = round(mean(value, na.rm = TRUE),2)) %>%
   rename('Site ID' = site_id) %>%
   kable() %>%
   kable_styling()

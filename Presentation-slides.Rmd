@@ -44,11 +44,13 @@ clean <- readings %>%
 
 # Background 
 
-- Seek to understand climate sensor data from Melbourne City Council
+- Conducting an analysis of Melbourne City Council climate sensor data
 - Two data sets: sensor locations, sensor readings 
+- Data measures the climate of Melbourne sensors including humidity, temperature, and air quality
+- Data can be found here: [sensor readings](https://data.melbourne.vic.gov.au/Environment/Microclimate-Sensor-Readings/u4vh-84j8?src=featured_banner), [Sensor locations](https://data.melbourne.vic.gov.au/Environment/Microclimate-Sensor-Locations/irqv-hjr4)
 - **How does relative humidity in Melbourne change throughout the day and year?**
 - **When is it most uncomfortable to walk around the city (humidity below 30% or above 60%)? **
-- Relative humidity: the amount of water vapor present in air expressed as a percentage of the amount needed for saturation at the same temperature
+- Relative humidity: the amount of water vapor present in air expressed as a percentage of the amount needed for saturation at the same temperature [howstuffworks](https://science.howstuffworks.com/nature/climate-weather/atmospheric/question651.htm)
 
 ???
 
@@ -61,13 +63,16 @@ class: inverse, center, middle
 
 # Data Checking 
 
+- Mean of arc1045 is significantly lower than the other sites
+- Data for arc1048 is only collected until the 29th of August 
+
 ```{r, echo=FALSE, warning = FALSE, message = FALSE, fig.height=4, dev='svg'}
 
 clean %>% 
   group_by(site_id) %>%
   summarise('Minimum Date'= min(date),
             'Maximum Date' = max(date),
-            'Average Humidity' = mean(value, na.rm = TRUE)) %>%
+            'Average Humidity' = round(mean(value, na.rm = TRUE),2)) %>%
   rename('Site ID' = site_id) %>%
   kable() %>%
   kable_styling()
@@ -76,7 +81,7 @@ clean %>%
 ---
 # Data Checking
 
-- Missing values in the data set
+- There are missing values in the data set across 3 sites
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 
@@ -106,7 +111,10 @@ gaps %>%
 ---
 # Locations 
 
-```{r location, echo = FALSE, warning= FALSE, message= FALSE, dev='svg', out.width='100%'}
+- sensors: arc1045, arc1046, arc1048, arc1050 are all on Grattan Street
+- sensor: arc1047 is on Pelham Street
+
+```{r location, echo = FALSE, warning= FALSE, message= FALSE, dev='svg', out.width='100%', out.height= '70%'}
 locations %>%
   leaflet() %>%
   addTiles() %>%
@@ -120,6 +128,9 @@ class: inverse, center, middle
 
 ---
 # Relative Humidity Across the Day by Site
+
+- Site arc1045 shows significantly lower relative humidity levels across all hours of the day
+- All other sensors show similar values with arc1047 showing higher peaks
 
 ```{r RH-day1, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
 clean %>%
@@ -142,6 +153,9 @@ clean %>%
 ---
 
 # Relative Humidity Across the Day Average
+
+- Relative humidity peaks in the early morning at around 5am and decreases throughout the day dipping at around 2pm
+- Perhaps when the sun is out vapor is evaporated throughout the day
 
 ```{r RH-day2, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
 clean %>%
@@ -168,6 +182,9 @@ class: inverse, center, middle
 
 # Relative Humidity Across the Year by Site
 
+- Again we see arc1045 shows a consistently lower humidity levels across the year 
+- All other sites show similar levels 
+
 ```{r RH-year1, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
 clean %>%
   group_by(site_id,date) %>%
@@ -180,7 +197,7 @@ clean %>%
   labs(x = "",
        y = "Relative Humidity (%)",
        colour = "Site ID",
-       title = "Average Relative Humidity by Day by Site") +
+       title = "Average Relative Humidity Across the Year by Site") +
   theme_minimal() +
   theme(legend.position = "bottom",
         text = element_text(size = 10),
@@ -189,6 +206,9 @@ clean %>%
 ---
 
 # Relative Humidity Across the Year by Average
+
+- Humidity is lowest in the summer months and builds peaking in mid June
+- In the summer the heat of the sun dries the vapor more compared to colder months  
 
 ```{r RH-year2, echo = FALSE, warning = FALSE, message = FALSE,fig.height=4, dev='svg'}
 clean %>%
@@ -201,7 +221,7 @@ clean %>%
   labs(x = "",
        y = "Relative Humidity (%)",
        colour = "Site ID",
-       title = "Average Relative Humidity by Day") +
+       title = "Average Relative Humidity Across the Year") +
   theme_minimal() +
   theme(text = element_text(size = 10),
         plot.title.position = "plot")
@@ -229,7 +249,7 @@ clean %>% group_by(site_id,date) %>%
   facet_wrap(~site_id, ncol = 1) +
   labs(x = "",
        y = "Difference from Mean Relative Humidity (%)",
-       title = "Average Relative Humidity by Day by Site") +
+       title = "Average Differnce Relative Humidity across Sites") +
   theme_minimal() +
   theme(text = element_text(size = 10),
         legend.position = "none")
@@ -251,6 +271,7 @@ Hot weather:
 - On warm days with high levels of humidity we can feel warmer and "sticky" as our sweat does not evaporate as efficiently
 - Think about countries near the equator such as Singapore, or Northern Queensland. 
 
+[WeatherNation](https://www.weathernationtv.com/news/dry-cold-vs-humid-cold/)
 ---
 
 ##  When is it most uncomfortable to walk around the city (humidity below 30% or above 60%)?
@@ -259,11 +280,36 @@ Cold weather:
 - By the same logic on colder days with higher humidity we should feel warmer
 - However, it is the opposite: we feel colder on cold days with higher humidity 
 - High humidity impairs the insulation ability of clothing 
-- moisture in fibers and wicking effect of clothing can accelerate the heat loss through clothing 
-- Humidity creates a thin layer of moisture on fibers on the fibers and result in greater transfer of heat through clothing
+- Moisture in fibers and wicking effect of clothing can accelerate the heat loss through clothing 
+- Humidity creates a thin layer of moisture on fibers and result in greater transfer of heat through clothing
 - Think about rain on a cold day
 
+[WeatherNation](https://www.weathernationtv.com/news/dry-cold-vs-humid-cold/)
+
 #### It would be most uncomfortable to walk around the city on days with high humidity 
+
+---
+
+# References 
+```{r, echo=FALSE, warning = FALSE, message = FALSE, dev='svg'}
+reftab <- tibble(References = c("Microclimate Sensor Readings, City of Melbourne, (https://data.melbourne.vic.gov.au/Environment/Microclimate-Sensor-Readings/u4vh-84j8?src=featured_banner)",
+                                "Microclimate Sensor Locations, City of Melbourne, (https://data.melbourne.vic.gov.au/Environment/Microclimate-Sensor-Locations/irqv-hjr4)",
+                                "Welcome to the {tidyverse} Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L.D., FranÃ§ois, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T.L., Miller, E., Bache, S.M., MÃ¼ller, K., Ooms, J., Robinson, D., Seidel, D.P., Spinu, V., Takahashi, K., Vaughan, D., Wilke, C., Woo, K. and Yutani, H., 2019. Journal of Open Source Software, Vol 4(43), pp. 1686. DOI: 10.21105/joss.01686",
+                                "Dates and Times Made Easy with {lubridate} Grolemund, G. and Wickham, H., 2011. Journal of Statistical Software, Vol 40(3), pp. 1--25.",
+                                "kableExtra: Construct Complex Table with 'kable' and Pipe Syntax     Zhu, H., 2019.",
+                                "leaflet: Create Interactive Web Maps with the JavaScript 'Leaflet' Library (https://cran.r-project.org/web/packages/kableExtra/index.html) Cheng, J., Karambelkar, B. and Xie, Y., 2019.",
+                                "visdat: Visualising Whole Data Frames (https://cran.r-project.org/web/packages/visdat/vignettes/using_visdat.html) Tierney, N., 2017. JOSS, Vol 2(16), pp. 355. Journal of Open Source Software. DOI: 10.21105/joss.00355",
+                                "A new tidy data structure to support exploration and modeling of temporal data (https://github.com/tidyverts/tsibble) Wang, E., Cook, D. and Hyndman, R.J., 2020. Journal of Computational and Graphical Statistics, Vol 29(3), pp. 466-478. Taylor & Francis. DOI: 10.1080/10618600.2019.1695624",
+                                "xaringan: Presentation Ninja, Yihui Xie, 2020, (https://CRAN.R-project.org/package=xaringan)",
+                                "Dry Cold vs Humid Cold, WeatherNation, (https://www.weathernationtv.com/news/dry-cold-vs-humid-cold/)",
+                                "What is Relative Humidity and How Does it Afffect How I Feel Outside, howstuffworks, (https://science.howstuffworks.com/nature/climate-weather/atmospheric/question651.htm)"))
+  
+reftab %>%
+  kable() %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "500px")
+```
+
 
 ---
 
