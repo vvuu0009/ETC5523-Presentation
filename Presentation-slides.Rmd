@@ -291,6 +291,16 @@ Cold weather:
 
 ---
 
+## Conclusion
+
+- On average humidity peaks early in the morning and decreases throughout the day being lowest at around 2pm and builds throughout the evening/night
+- On average humidity is lowest in summer and highest in winter
+- On average arc1045 shows consistently lower humidity levels compared to the other arcs 
+- All other arcs show similar humidity readings but arc1047 is slightly higher 
+- It is most uncomfortable to walk around the city on days with high humidity 
+
+---
+
 # References 
 ```{r ref, echo=FALSE, warning = FALSE, message = FALSE, dev='svg'}
 reftab <- tibble(References = c("Microclimate Sensor Readings, City of Melbourne, (https://data.melbourne.vic.gov.au/Environment/Microclimate-Sensor-Readings/u4vh-84j8?src=featured_banner)",
